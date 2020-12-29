@@ -1,5 +1,10 @@
 {
-  "building": [
-    "No sea surrounding"
+  "forest": [
+    ""
+  ],
+  "path": [
+    "Cannot be interrupted except for the beginning and the end.",
+    "Cannot bifurcate in more than 2 paths.",
+    "Accessible after no more than 6 tiles."
   ]
 }
