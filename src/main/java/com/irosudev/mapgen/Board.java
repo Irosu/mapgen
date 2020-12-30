@@ -33,7 +33,7 @@ public class Board {
 
         for (Tile[] tiles : tileBoard) {
             for (Tile tile : tiles) {
-                builder.append(tile != null ? tile : Tile.displayWhite());
+                builder.append(tile);
             }
             builder.append("\n");
         }
@@ -52,7 +52,7 @@ public class Board {
         final int t = cols * rows;      //Movimientos totales
         boolean add;                    //Nos dice si hay que añadir o quitar en cada bucle
 
-        colorTile(r, c);
+        colorTile(r, c, t * 1.0 / n);
 
         do {
             s++;
@@ -61,7 +61,7 @@ public class Board {
             //Bucle que recorre las columnas
             for(boolean jump = true; (add ? c >= cf : c <= cf) && n < t; c += add ? -1 : 1, n++) {
                 if(!jump){
-                    colorTile(r, c);
+                    colorTile(r, c, t * 1.0 / n);
                 }
                 else {
                     n--;
@@ -76,7 +76,7 @@ public class Board {
             //Bucle que recorre las filas
             for(boolean jump = true; (add ? r >= rf : r <= rf) && n < t; r += add ? -1 : 1, n++) {
                 if(!jump) {
-                    colorTile(r, c);
+                    colorTile(r, c, t * 1.0 / n);
                 }
                 else {
                     n--;
@@ -95,16 +95,17 @@ public class Board {
     /**
      * Place a new {@link Tile} into the given position.
      */
-    private void colorTile(int r, int c) {
-        tileBoard[r][c] = fieldOrSea(r, c);
+    private void colorTile(int r, int c, double n) {
+        tileBoard[r][c] = new Tile(fieldOrSea(r, c, n), new TilePosition(r, c));
     }
 
     /**
-     * Decide whether the next {@link Tile} is FIELD or SEA
-     * @return the chosen {@link Tile}
+     * Decide whether the next {@link Biome} is FIELD or SEA
+     * @param
+     * @return the chosen {@link Biome}
      */
-    private Tile fieldOrSea(int r, int c) {
-        return Math.random() >= 0.5 ? Tile.FIELD : Tile.SEA;
+    private Biome fieldOrSea(int r, int c, double n) {
+        return Math.random()*n >= 0.5 ? Biome.FIELD : Biome.SEA;
     }
 
     /**
@@ -126,5 +127,40 @@ public class Board {
     private TilePosition calcInitTale() {
         int pos = (int)Math.ceil(rows/2.0) - 1;
         return new TilePosition(pos, pos);
+    }
+
+
+    private void killLonelyTiles() {
+        for (Tile[] tiles : tileBoard) {
+            for (Tile tile : tiles) {
+                int count = 0;
+
+            }
+        }
+    }
+
+    private int surroundingTiles(TilePosition pos) {
+return 0;
+    }
+
+    /**
+     * Runs a new thread that will display the next tile of the board every 20 ms.
+     */
+    synchronized public void display() {
+        Thread displayThread = new Thread(() -> {
+            for (Tile[] tiles : tileBoard) {
+                for (Tile tile : tiles) {
+                    System.out.print(tile);
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println();
+            }
+        });
+
+        displayThread.start();
     }
 }
