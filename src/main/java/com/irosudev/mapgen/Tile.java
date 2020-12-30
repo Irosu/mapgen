@@ -2,12 +2,12 @@ package com.irosudev.mapgen;
 
 public class Tile {
 
-    private final Biome biome;
-    private final TilePosition position;
+    public Biome biome;
+    public final TilePosition pos;
 
-    public Tile(Biome biome, TilePosition position) {
+    public Tile(Biome biome, TilePosition pos) {
         this.biome = biome;
-        this.position = position;
+        this.pos = pos;
     }
 
     @Override

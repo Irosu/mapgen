@@ -14,16 +14,23 @@ public class Board {
     private final int totalSeaTiles;
     private static final int MAX_SEA_PROP = 50;
     private static final int MIN_SEA_PROP = 10;
+    private final double SEA_PROP;
 
-    public Board(final int rows, final int cols) throws Exception {
+    public Board(final int rows, final int cols, final int seaProp) throws Exception {
         if(cols < rows) {
             throw new Exception("The height of the board must be equals or smaller than its width.");
         }
+
+        if(seaProp < 1 || seaProp > 100) {
+            throw new Exception("Sea proportion must be a number between 0 and 100.");
+        }
+
         this.rows = rows;
         this.cols = cols;
         this.tileBoard = new Tile[rows][cols];
         this.totalSeaTiles = generateSeaProp();
         this.initTile = calcInitTale();
+        this.SEA_PROP = 100 * 0.5 / seaProp;
         this.fillBoard();
     }
 
@@ -42,8 +49,8 @@ public class Board {
     }
 
     private void fillBoard() {
-        int r = initTile.left;          //Fila actual
-        int c = initTile.right;         //Columna actual
+        int r = initTile.row;           //Fila actual
+        int c = initTile.col;           //Columna actual
         final int sa = cols - rows + 1; //Suma a la columna para calcular dónde acaba el bucle
         int s = 0;                      //Suma a la columna y la fila para calcular dónde acaba el bucle
         int rf = r + s + 1;             //Fila final de bucle
@@ -90,6 +97,7 @@ public class Board {
 
         } while (n < t);
 
+        killSeaTiles();
     }
 
     /**
@@ -105,7 +113,7 @@ public class Board {
      * @return the chosen {@link Biome}
      */
     private Biome fieldOrSea(int r, int c, double n) {
-        return Math.random()*n >= 0.5 ? Biome.FIELD : Biome.SEA;
+        return Math.random() * SEA_PROP * n >= 0.5 ? Biome.FIELD : Biome.SEA;
     }
 
     /**
@@ -129,30 +137,48 @@ public class Board {
         return new TilePosition(pos, pos);
     }
 
-
-    private void killLonelyTiles() {
+    public void killSeaTiles() {
         for (Tile[] tiles : tileBoard) {
             for (Tile tile : tiles) {
-                int count = 0;
-
+                if(surroundingLandTiles(tile.pos) > 7) {
+                    tile.biome = Biome.FIELD;
+                }
             }
         }
     }
 
-    private int surroundingTiles(TilePosition pos) {
-return 0;
+    private int surroundingLandTiles(TilePosition pos) {
+        int row = pos.row;
+        int col = pos.col;
+
+        int seaCount = 0;
+        int landCount = 0;
+
+        for(int c = col-1; c <= col+1; c++) {
+            for(int r = row-1; r <= row+1; r++) {
+                try {
+                    if(tileBoard[r][c].biome == Biome.SEA) {
+                        seaCount++;
+                    } else {
+                        landCount++;
+                    }
+                } catch (IndexOutOfBoundsException e){}
+            }
+        }
+
+        return landCount;
     }
 
     /**
-     * Runs a new thread that will display the next tile of the board every 20 ms.
+     * Runs a new thread that will display the next tile of the board every 5 ms.
      */
-    synchronized public void display() {
+    public void displaySlowly() {
         Thread displayThread = new Thread(() -> {
             for (Tile[] tiles : tileBoard) {
                 for (Tile tile : tiles) {
                     System.out.print(tile);
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(5);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -162,5 +188,14 @@ return 0;
         });
 
         displayThread.start();
+    }
+
+    public void display() {
+        for (Tile[] tiles : tileBoard) {
+            for (Tile tile : tiles) {
+                System.out.print(tile);
+            }
+            System.out.println();
+        }
     }
 }
